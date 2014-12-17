@@ -1,0 +1,49 @@
+<html>
+<head>
+  <title> HEXO GUI </title>
+  <meta charset="utf-8"/>
+
+  <link rel="stylesheet" href="index.css"/>
+  <script src="bower_components/angular/angular.js" type="text/javascript"></script>
+  <script src="bower_components/jquery/dist/jquery.js" type="text/javascript"></script>
+
+</head>
+<body ng-app="HexoGUIApp">
+  <div ng-controller="MainCtrl">
+    <input type="file" nwdirectory ngnwdir='nnn'/>
+    <div>{{nnn}}</div>
+  </div>
+
+<script>
+
+var app = angular.module('HexoGUIApp', []);
+
+app.directive('ngnwdir', function() {
+  return {
+    scope: {
+      'ngnwdir': '='
+    },
+    link: function(scope,element,attrs){
+      $(element).change(function(evt){
+        var val = $(this).val();
+        scope.$apply(function(){
+          scope.ngnwdir = val;
+        });
+      });
+    }
+  };
+});
+
+app.controller('MainCtrl', function($scope){
+
+});
+
+// Load native UI library
+var gui = require('nw.gui');
+
+// Create an empty menu
+var menu = new gui.Menu();
+
+</script>
+</body>
+</html>
