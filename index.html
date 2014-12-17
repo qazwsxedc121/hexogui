@@ -5,18 +5,32 @@
 
   <link rel="stylesheet" href="index.css"/>
   <script src="bower_components/angular/angular.js" type="text/javascript"></script>
+  <script src="bower_components/angular-route/angular-route.js"></script>
   <script src="bower_components/jquery/dist/jquery.js" type="text/javascript"></script>
 
 </head>
 <body ng-app="HexoGUIApp">
-  <div ng-controller="MainCtrl">
-    <input type="file" nwdirectory ngnwdir='nnn'/>
-    <div>{{nnn}}</div>
-  </div>
+  <div ng-view></div>
 
 <script>
 
-var app = angular.module('HexoGUIApp', []);
+var app = angular.module('HexoGUIApp', ['ngRoute']);
+
+app.config(['$routeProvider',
+  function($routeProvider) {
+    $routeProvider.
+    when('/', {
+      templateUrl: 'partials/main.html',
+      controller: 'MainCtrl'
+    }).
+    when('/config', {
+      templateUrl: 'partials/config.html',
+      controller: 'ConfigCtrl'
+    }).
+    otherwise({
+      redirectTo: '/'
+    });
+  }]);
 
 app.directive('ngnwdir', function() {
   return {
@@ -34,8 +48,20 @@ app.directive('ngnwdir', function() {
   };
 });
 
-app.controller('MainCtrl', function($scope){
+var config = {
+  'dirpath': ''
+};
 
+app.controller('ConfigCtrl', function($scope, $location){
+  $scope.submit = function(){
+    config.dirpath = $scope.nnn;
+    $location.path('/');
+  };
+});
+
+app.controller('MainCtrl', function($scope){
+  $scope.dirpath = config.dirpath;
+  $scope.articles = [];
 });
 
 // Load native UI library
