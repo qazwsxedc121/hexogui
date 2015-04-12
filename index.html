@@ -13,7 +13,9 @@
   <div ng-view></div>
 
 <script>
-
+var fs = require('fs');
+var path = require('path');
+var yaml = require('js-yaml');
 var app = angular.module('HexoGUIApp', ['ngRoute']);
 
 app.config(['$routeProvider',
@@ -32,36 +34,46 @@ app.config(['$routeProvider',
     });
   }]);
 
-app.directive('ngnwdir', function() {
-  return {
-    scope: {
-      'ngnwdir': '='
-    },
-    link: function(scope,element,attrs){
-      $(element).change(function(evt){
-        var val = $(this).val();
-        scope.$apply(function(){
-          scope.ngnwdir = val;
-        });
-      });
+
+
+app.factory('HexoService', function(){
+  var service = {};
+  service.config = {
+    'dirpath' : ''
+  };
+  service.posts = [];
+  service.posts1 = [];
+  service.read = function(){
+    var postdir_path = service.config.dirpath + '/source/_posts';
+    var files = fs.readdirSync(postdir_path);
+    for(i = 0; i < files.length; i += 1){
+      service.posts.push(path.join(postdir_path, files[i]));
+    }
+    for(i = 0; i < service.posts.length; i += 1){
+      service.posts1.push(readmeta(service.posts[i]));
     }
   };
+  var readmeta = function(filepath){
+    var file_str = fs.readFileSync(filepath, 'utf-8');
+    var index = file_str.indexOf('---\n');
+    file_str = file_str.substring(0,index);
+    var meta = yaml.safeLoad(file_str);
+    return meta;
+  };
+  return service;
 });
 
-var config = {
-  'dirpath': ''
-};
-
-app.controller('ConfigCtrl', function($scope, $location){
+app.controller('ConfigCtrl', function($scope, $location, HexoService){
   $scope.submit = function(){
-    config.dirpath = $scope.nnn;
+    HexoService.config.dirpath = $scope.nnn;
+    HexoService.read();
     $location.path('/');
   };
 });
 
-app.controller('MainCtrl', function($scope){
-  $scope.dirpath = config.dirpath;
-  $scope.articles = [];
+app.controller('MainCtrl', function($scope, HexoService){
+  $scope.dirpath = HexoService.config.dirpath;
+  $scope.articles = HexoService.posts1;
 });
 
 // Load native UI library
@@ -71,5 +83,6 @@ var gui = require('nw.gui');
 var menu = new gui.Menu();
 
 </script>
+<script src="scripts/directive.js"></script>
 </body>
 </html>
